@@ -785,10 +785,10 @@ static void cc2520_fifop_irqwork(struct work_struct *work)
 
 	dev_dbg(&priv->spi->dev, "fifop interrupt received\n");
 
-	if (gpio_get_value(priv->fifo_pin))
+	//if (gpio_get_value(priv->fifo_pin))
 		cc2520_rx(priv);
-	else
-		dev_dbg(&priv->spi->dev, "rxfifo overflow\n");
+	//else
+	//	dev_dbg(&priv->spi->dev, "rxfifo overflow\n");
 
 	cc2520_cmd_strobe(priv, CC2520_CMD_SFLUSHRX);
 	cc2520_cmd_strobe(priv, CC2520_CMD_SFLUSHRX);
@@ -843,7 +843,7 @@ static int cc2520_get_platform_data(struct spi_device *spi,
 
 	pdata->sfd = of_get_named_gpio(np, "sfd-gpio", 0);
 	pdata->cca = of_get_named_gpio(np, "cca-gpio", 0);
-	pdata->vreg = of_get_named_gpio(np, "vreg-gpio", 0);
+	//pdata->vreg = of_get_named_gpio(np, "vreg-gpio", 0);
 	pdata->reset = of_get_named_gpio(np, "reset-gpio", 0);
 
 	/* CC2591 front end for CC2520 */
@@ -1065,22 +1065,6 @@ static int cc2520_probe(struct spi_device *spi)
 	if (ret)
 		goto err_hw_init;
 
-	if (!gpio_is_valid(pdata.vreg)) {
-		dev_err(&spi->dev, "vreg gpio is not valid\n");
-		ret = -EINVAL;
-		goto err_hw_init;
-	}
-
-	ret = devm_gpio_request_one(&spi->dev, pdata.vreg,
-				    GPIOF_OUT_INIT_LOW, "vreg");
-	if (ret)
-		goto err_hw_init;
-
-	gpio_set_value(pdata.vreg, HIGH);
-	usleep_range(100, 150);
-
-	gpio_set_value(pdata.reset, HIGH);
-	usleep_range(200, 250);
 
 	ret = cc2520_hw_init(priv);
 	if (ret)
